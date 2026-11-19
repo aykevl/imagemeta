@@ -10,17 +10,18 @@ I welcome PRs with fixes, but please raise an issue first if you want to add new
 
 ## Supported formats
 
-| Format                         | EXIF | IPTC | XMP | CONFIG |
-| ------------------------------ | :--: | :--: | :-: | :----: |
-| JPEG                           |  ✓   |  ✓   |  ✓  |   ✓    |
-| TIFF                           |  ✓   |  ✓   |  ✓  |   ✓    |
-| PNG                            |  ✓   |  ✓   |  ✓  |   ✓    |
-| WebP                           |  ✓   |      |  ✓  |   ✓    |
-| HEIF/HEIC                      |  ✓   |      |  ✓  |   ✓    |
-| AVIF                           |  ✓   |      |  ✓  |   ✓    |
-| JPEG XL                        |  ✓   |      |  ✓  |   ✓    |
-| RAW (DNG, CR2, NEF, ARW, PEF)  |  ✓   |  ✓   |  ✓  |   ✓    |
-| GIF                            |      |      |     |   ✓    |
+| Format                         | EXIF | IPTC | XMP | CONFIG | ISOBMFF |
+| ------------------------------ | :--: | :--: | :-: | :----: | :-----: |
+| JPEG                           |  ✓   |  ✓   |  ✓  |   ✓    |         |
+| TIFF                           |  ✓   |  ✓   |  ✓  |   ✓    |         |
+| PNG                            |  ✓   |  ✓   |  ✓  |   ✓    |         |
+| WebP                           |  ✓   |      |  ✓  |   ✓    |         |
+| HEIF/HEIC                      |  ✓   |      |  ✓  |   ✓    |         |
+| AVIF                           |  ✓   |      |  ✓  |   ✓    |         |
+| JPEG XL                        |  ✓   |      |  ✓  |   ✓    |         |
+| RAW (DNG, CR2, NEF, ARW, PEF)  |  ✓   |  ✓   |  ✓  |   ✓    |         |
+| GIF                            |      |      |     |   ✓    |         |
+| MP4                            |      |      |  ✓  |   ✓    |   ✓     |
 
 CONFIG includes the frame count for GIF, animated PNG (APNG), WebP and AVIF/HEIF image sequences. JPEG XL animations are not detected and always report 1 frame.
 

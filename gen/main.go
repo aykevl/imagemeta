@@ -57,7 +57,7 @@ func main() {
 
 		imageConfigOutFilename := filepath.Join(outDir, basePath+".config.json")
 		buf.Reset()
-		cmd = exec.Command("identify", "-format", "{\"width\": %w, \"height\": %h}", path)
+		cmd = exec.Command("identify", "-format", "{\"width\": %w, \"height\": %h}", path+"[0]") // [0] at the end means first frame only
 		cmd.Stdout = &buf
 		var errorBuf bytes.Buffer
 		cmd.Stderr = &errorBuf

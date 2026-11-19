@@ -981,6 +981,10 @@ func TestGoldenConfig(t *testing.T) {
 	withGolden(t, imagemeta.CONFIG)
 }
 
+func TestGoldenISOBMFF(t *testing.T) {
+	withGolden(t, imagemeta.ISOBMFF)
+}
+
 func TestGoldenEXIFAndIPTCAndConfig(t *testing.T) {
 	withGolden(t, imagemeta.EXIF|imagemeta.IPTC|imagemeta.CONFIG)
 }
@@ -1125,6 +1129,7 @@ type goldenFileInfo struct {
 	EXIF      map[string]any
 	IPTC      map[string]any
 	XMP       map[string]any
+	QuickTime map[string]any // ISOBMFF
 	Composite map[string]any
 	Config    imagemeta.ImageConfig
 }
@@ -1269,6 +1274,12 @@ func compareWithExiftoolOutput(t testing.TB, filename string, sources imagemeta.
 				return v.Float64()
 			case imagemeta.Rat[int32]:
 				return v.Float64()
+			case imagemeta.Rat[uint64]:
+				return v.Float64()
+			case imagemeta.ISOBMFFTimestamp:
+				return v.Time().UTC().Format("2006:01:02 15:04:05")
+			case imagemeta.ISOBMFFMatrixStructure:
+				return v.String()
 			case float64:
 				return v
 			case int64:
@@ -1278,6 +1289,8 @@ func compareWithExiftoolOutput(t testing.TB, filename string, sources imagemeta.
 			case int32:
 				return float64(v)
 			case uint16:
+				return float64(v)
+			case int16:
 				return float64(v)
 			case uint8:
 				return float64(v)
@@ -1379,6 +1392,8 @@ func compareWithExiftoolOutput(t testing.TB, filename string, sources imagemeta.
 			exifToolValue, found = goldenInfo.IPTC[v.Tag]
 		case imagemeta.XMP:
 			exifToolValue, found = goldenInfo.XMP[v.Tag]
+		case imagemeta.ISOBMFF:
+			exifToolValue, found = goldenInfo.QuickTime[v.Tag]
 		}
 
 		if found {
@@ -1421,6 +1436,8 @@ func extToFormat(ext string) imagemeta.ImageFormat {
 		return imagemeta.AVIF
 	case ".jxl":
 		return imagemeta.JXL
+	case ".mp4":
+		return imagemeta.MP4
 	case ".dng":
 		return imagemeta.DNG
 	case ".cr2":

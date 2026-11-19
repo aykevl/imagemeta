@@ -63,7 +63,7 @@ func isInvalidFormatErrorCandidate(err error) bool {
 }
 
 // Rat is a rational number.
-type Rat[T int32 | uint32] interface {
+type Rat[T int32 | uint32 | uint64] interface {
 	Num() T
 	Den() T
 	Float64() float64
@@ -80,7 +80,7 @@ var (
 
 // rat is a rational number.
 // It's a lightweight version of math/big.rat.
-type rat[T int32 | uint32] struct {
+type rat[T int32 | uint32 | uint64] struct {
 	num T
 	den T
 }
@@ -408,6 +408,42 @@ func (c vc) toDegrees(v any) (float64, error) {
 	default:
 		return 0.0, fmt.Errorf("unsupported degree type %T", v)
 	}
+}
+
+// Timestamp as used in ISOBMFF files (such as MP4).
+// They start at a specific time in the past, namely Jan 1st 1904.
+type ISOBMFFTimestamp uint64
+
+func (t ISOBMFFTimestamp) Time() time.Time {
+	// Difference between Jan 1st 1904 and Jan 1st 1970 is
+	// 2082844800 seconds:
+	// https://go.dev/play/p/5O2p15gGjt8
+	return time.Unix(int64(t)-2082844800, 0)
+}
+
+// Matrix structure for ISOBMFF files. This encodes (among others) the rotation
+// of the video file.
+type ISOBMFFMatrixStructure [9]int32
+
+// Return the matrix structure as a string matching exiftool.
+func (m ISOBMFFMatrixStructure) String() string {
+	// From the specification:
+	//
+	// > All the values in a matrix are stored as 16.16 fixed-point values,
+	// > except for u, v and w, which are stored as 2.30 fixed-point values.
+	// >
+	// > The values in the matrix are stored in the order {a,b,u, c,d,v, x,y,w}.
+
+	return fmt.Sprintf("%v %v %v %v %v %v %v %v %v",
+		float64(m[0])/(1<<16),
+		float64(m[1])/(1<<16),
+		float64(m[2])/(1<<30),
+		float64(m[3])/(1<<16),
+		float64(m[4])/(1<<16),
+		float64(m[5])/(1<<30),
+		float64(m[6])/(1<<16),
+		float64(m[7])/(1<<16),
+		float64(m[8])/(1<<30))
 }
 
 func isASCII(s string) bool {

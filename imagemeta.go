@@ -24,6 +24,10 @@ const (
 	// XMP is the XMP tag source.
 	XMP
 
+	// ISOBMFF is the ISO Base Media File Format, used for MP4 and many others.
+	// It contains some media metadata.
+	ISOBMFF
+
 	// CONFIG source, which currently the image dimensions encoded in the image.
 	// Note that this may not be the same as the dimensions stored in EXIF tags.
 	CONFIG
@@ -52,6 +56,8 @@ const (
 	HEIF
 	// AVIF is the AVIF image format (ISO Base Media File Format with AV1 codec).
 	AVIF
+	// MP4 is the MP4 image format (ISO Base Media File Format with many different codecs).
+	MP4
 	// DNG is the DNG (Digital Negative) RAW image format.
 	DNG
 	// CR2 is the Canon CR2 RAW image format.
@@ -213,6 +219,8 @@ func Decode(opts Options) (result DecodeResult, err error) {
 		sourceSet = EXIF | XMP | IPTC | CONFIG
 	case HEIF, AVIF, JXL:
 		sourceSet = EXIF | XMP | CONFIG
+	case MP4:
+		sourceSet = XMP | CONFIG | ISOBMFF
 	case DNG, CR2, NEF, ARW, PEF:
 		sourceSet = EXIF | XMP | IPTC | CONFIG
 	case GIF:
@@ -263,6 +271,8 @@ func Decode(opts Options) (result DecodeResult, err error) {
 		dec = &imageDecoderPNG{baseStreamingDecoder: base}
 	case HEIF, AVIF:
 		dec = &imageDecoderHEIF{baseStreamingDecoder: base}
+	case MP4:
+		dec = &imageDecoderMP4{baseStreamingDecoder: base}
 	case JXL:
 		dec = &imageDecoderJXL{baseStreamingDecoder: base}
 	case DNG, CR2, NEF, ARW, PEF:
@@ -440,9 +450,10 @@ func (t Source) IsZero() bool {
 
 // Tags is a collection of tags grouped per source.
 type Tags struct {
-	exif map[string]TagInfo
-	iptc map[string]TagInfo
-	xmp  map[string]TagInfo
+	exif    map[string]TagInfo
+	iptc    map[string]TagInfo
+	xmp     map[string]TagInfo
+	isobmff map[string]TagInfo
 }
 
 // Add adds a tag to the correct source.
@@ -480,12 +491,21 @@ func (t *Tags) XMP() map[string]TagInfo {
 	return t.xmp
 }
 
+// ISOBMFF returns ISO Base Media File Format tags.
+func (t *Tags) ISOBMFF() map[string]TagInfo {
+	if t.isobmff == nil {
+		t.isobmff = make(map[string]TagInfo)
+	}
+	return t.isobmff
+}
+
 // All returns all tags in a map.
 func (t Tags) All() map[string]TagInfo {
 	all := make(map[string]TagInfo)
 	maps.Copy(all, t.EXIF())
 	maps.Copy(all, t.IPTC())
 	maps.Copy(all, t.XMP())
+	maps.Copy(all, t.ISOBMFF())
 	return all
 }
 
@@ -619,6 +639,8 @@ func (t *Tags) getSourceMap(source Source) map[string]TagInfo {
 		return t.IPTC()
 	case XMP:
 		return t.XMP()
+	case ISOBMFF:
+		return t.ISOBMFF()
 	default:
 		return nil
 	}
